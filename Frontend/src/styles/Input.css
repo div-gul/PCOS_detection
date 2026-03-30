@@ -100,6 +100,54 @@ input, select {
   white-space: pre-line;
 }
 
+.result-container {
+  margin-top: 30px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.result-card {
+  background: rgba(255,255,255,0.05);
+  padding: 20px;
+  border-radius: 12px;
+  width: 220px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  color: white;
+  transition: 0.3s;
+}
+
+.result-card:hover {
+  transform: translateY(-5px);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: #333;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.progress {
+  height: 100%;
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
+}
+
+.percentage {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.badge {
+  background: #00c6ff;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
 /* Animation */
 @keyframes fadeUp {
   from {

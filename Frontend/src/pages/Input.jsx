@@ -29,17 +29,90 @@ const Input = () => {
     T4U: "",
     FTI: ""
   });
+  const [result, setResult] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    let output = {};
+
+    // Diabetes
+    const d_res = await fetch("http://127.0.0.1:5000/predict_diabetes", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        Pregnancies: +formData.Pregnancies,
+        Glucose: +formData.Glucose,
+        BloodPressure: +formData.BloodPressure,
+        SkinThickness: +formData.SkinThickness,
+        Insulin: +formData.Insulin,
+        BMI: +formData.BMI,
+        DiabetesPedigreeFunction: +formData.DPF,
+        Age: +formData.Age
+      })
+    });
+
+    const d_json = await d_res.json();
+    output.diabetes = d_json.risk_percentage;
+
+    // PCOS
+    if (formData.gender === "female") {
+      const p_res = await fetch("http://127.0.0.1:5000/predict_pcos", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          "Follicle No. (R)": +formData.folR,
+          "Follicle No. (L)": +formData.folL,
+          "Skin darkening (Y/N)": +formData.skin,
+          "hair growth(Y/N)": +formData.hair,
+          "Weight gain(Y/N)": +formData.weight,
+          "AMH(ng/mL)": +formData.amh,
+          "Cycle(R/I)": +formData.cycle,
+          "FSH/LH": +formData.ratio,
+          "LH(mIU/mL)": +formData.lh,
+          "Fast food (Y/N)": +formData.fastfood
+        })
+      });
+
+      const p_json = await p_res.json();
+      output.pcos = p_json.risk_percentage;
+    }
+
+    // Thyroid
+    const t_res = await fetch("http://127.0.0.1:5000/predict_thyroid", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        age: +formData.Age,
+        sex: formData.gender === "male" ? 1 : 0,
+        TSH: +formData.TSH,
+        TT4: +formData.TT4,
+        T4U: +formData.T4U,
+        FTI: +formData.FTI
+      })
+    });
+
+    const t_json = await t_res.json();
+    output.thyroid = t_json.confidence;
+
+    setResult(output);
+
+  } catch (err) {
+    alert("Server error!");
+  }
+};
 
   return (
     <div className="input-container">
       <div className="form-card">
         <h1 className="title">Hormonal Health Risk Predictor</h1>
 
-        <form>
+        <form onSubmit={handleSubmit}>
 
           {/* Gender */}
           <div className="section">
@@ -220,6 +293,38 @@ const Input = () => {
           </button>
 
         </form>
+
+        {result && (
+  <div className="result-container">
+
+    {/* Diabetes */}
+    <div className="result-card">
+      <h3>🩺 Diabetes</h3>
+      <div className="progress-bar">
+        <div
+          className="progress"
+          style={{ width: `${result.diabetes}%` }}
+        ></div>
+      </div>
+      <p>{result.diabetes}% Risk</p>
+    </div>
+
+    {/* PCOS */}
+    {result.pcos && (
+      <div className="result-card">
+        <h3>🌸 PCOS</h3>
+        <p className="percentage">{result.pcos}%</p>
+      </div>
+    )}
+
+    {/* Thyroid */}
+    <div className="result-card">
+      <h3>🧠 Thyroid</h3>
+      <p className="badge">{result.thyroid}</p>
+    </div>
+
+  </div>
+)}
       </div>
     </div>
   );
